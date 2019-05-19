@@ -9,12 +9,12 @@ public class PlagiarismAnalysis implements Detector{
             String w1 = tuple1[i];
             String w2 = tuple2[i];
             if (!w1.equals(w2)){
-                if (synsMap.containsKey(w1) && synsMap.containsKey(w2)){
-                    if (!synsMap.get(w1).equals(synsMap.get(w2))){
+                if (!synsMap.containsKey(w1) || !synsMap.containsKey(w2)){
+                    return false;
+                }else{
+                    if (!synsMap.get(w1).equals(synsMap.get(w2))) {
                         return false;
                     }
-                }else{
-                    return false;
                 }
             }
         }
@@ -27,11 +27,11 @@ public class PlagiarismAnalysis implements Detector{
         BufferedReader reader = null;
         try{
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-            String line;
-            while((line = reader.readLine()) != null){
+            // String to store line read
+            String l;
+            while((l = reader.readLine()) != null){
                 // Ignore Case
-                String[] wordsInLine = line.toLowerCase().split(" ");
-                printS(wordsInLine);
+                String[] wordsInLine = l.toLowerCase().split(" ");
                 for (int i = 0; i <= wordsInLine.length - N; i++) {
                     String[] tuple = new String[N];
                     int j = 0;
@@ -58,12 +58,13 @@ public class PlagiarismAnalysis implements Detector{
 
         try{
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-            String line;
-            while ((line = reader.readLine()) != null) {
+            // String to store line read
+            String l;
+            while ((l = reader.readLine()) != null) {
                 // Ignore Case
-                String[] wordsInLine = line.toLowerCase().split(" ");
+                String[] wordsInLine = l.toLowerCase().split(" ");
                 for (String word: wordsInLine){
-                    HashSet<String> set = null;
+                    HashSet<String> set;
                     if (synsMap.containsKey(word)){
                         set = synsMap.get(word);
                     }else{
@@ -94,8 +95,6 @@ public class PlagiarismAnalysis implements Detector{
         // import data from input files
         tuplesFromFile1 = getTuplesFromFile(file1, N);
         tuplesFromFile2 = getTuplesFromFile(file2, N);
-        print(tuplesFromFile1);
-        print(tuplesFromFile2);
         synsMap = generateSynsMap(syns);
 
         // Check similarities by incrementing synscount each time we find a similarity 
@@ -109,34 +108,15 @@ public class PlagiarismAnalysis implements Detector{
         return synscount / tuplesFromFile2.size();
     }
 
-    private void print(List<String[]> tuples){
-        for (String[] s: tuples){
-            System.out.print("[");
-            for (String ss: s){
-                System.out.print(ss+",");
-            }
-            System.out.print("]");
-        }
-        System.out.println();
-    }
-
-    private void printS(String[] words){
-        System.out.print("[");
-        for (String ss : words) {
-            System.out.print(ss + ",");
-        }
-        System.out.println("]");
-    }
-
     public static void main(String[] args) throws IOException{
         if (args.length > 4 || args.length < 3) {
             System.err.println("Please enter either 3 or 4 arguments");
             System.exit(-1);
         }
 
-        String syns = "../data/" + args[0];
-        String file1 = "../data/" + args[1];
-        String file2 = "../data/" + args[2];
+        String synsFile = "../data/" + args[0];
+        String f1 = "../data/" + args[1];
+        String f2 = "../data/" + args[2];
 
         int N = 0;
         if (args.length == 4){
@@ -146,8 +126,8 @@ public class PlagiarismAnalysis implements Detector{
         }
 
         PlagiarismAnalysis pd = new PlagiarismAnalysis();
-        Double result = pd.checkPlagiarism(syns, file1, file2, N);
-        // if file2 is empty, print 0.0%
+        Double result = pd.checkPlagiarism(synsFile, f1, f2, N);
+        // if file2 is empty, output 0.0%
         if (result.isNaN()){
             System.out.println("0.0%");
             return;
